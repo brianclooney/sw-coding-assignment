@@ -4,6 +4,8 @@
 
 #include "write_raw_command.h"
 #include "virtual_eprom.h"
+#include "eprom_file.h"
+
 
 int WriteRawCommand::run(Context& context, int argc, char* argv[]) {
 
@@ -17,7 +19,8 @@ int WriteRawCommand::run(Context& context, int argc, char* argv[]) {
     std::string data = argv[2];
     
     try {
-        VirtualEprom eprom{filename};
+        EpromFile epromFile{filename};
+        VirtualEprom eprom{&epromFile};
         eprom.writeRaw(address, data);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

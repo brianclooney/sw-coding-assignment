@@ -1,6 +1,8 @@
 
 #include "read_file_command.h"
 #include "virtual_eprom.h"
+#include "eprom_file.h"
+
 
 int ReadFileCommand::run(Context& context, int argc, char* argv[]) {
 
@@ -12,10 +14,11 @@ int ReadFileCommand::run(Context& context, int argc, char* argv[]) {
     auto filename = context.readCurrentVepromFile();
     std::string dataFile = argv[1];
     
-    VirtualEprom eprom{filename};
+    EpromFile epromFile{filename};
+    VirtualEprom eprom{&epromFile};
     auto data = eprom.readFile(dataFile);
     
-    std::cout << data << std::endl;
+    std::cout << data; //  << std::endl;
     
     return 0;
 }

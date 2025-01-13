@@ -3,6 +3,8 @@
 
 #include "write_file_command.h"
 #include "virtual_eprom.h"
+#include "eprom_file.h"
+
 
 int WriteFileCommand::run(Context& context, int argc, char* argv[]) {
 
@@ -15,7 +17,8 @@ int WriteFileCommand::run(Context& context, int argc, char* argv[]) {
     std::string dataFile = argv[1];
 
     try {
-        VirtualEprom eprom{filename};
+        EpromFile epromFile{filename};
+        VirtualEprom eprom{&epromFile};
         eprom.writeFile(dataFile);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;

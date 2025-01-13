@@ -1,6 +1,7 @@
 
 #include "erase_command.h"
 #include "virtual_eprom.h"
+#include "eprom_file.h"
 
 int EraseCommand::run(Context& context, int argc, char* argv[]) {
     
@@ -11,7 +12,8 @@ int EraseCommand::run(Context& context, int argc, char* argv[]) {
     
     auto filename = context.readCurrentVepromFile();
     
-    VirtualEprom eprom{filename};
+    EpromFile epromFile{filename};
+    VirtualEprom eprom{&epromFile};
     eprom.erase();
     
     return 0;

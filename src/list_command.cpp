@@ -4,6 +4,7 @@
 
 #include "list_command.h"
 #include "virtual_eprom.h"
+#include "eprom_file.h"
 
 int ListCommand::run(Context& context, int argc, char* argv[]) {
 
@@ -14,8 +15,9 @@ int ListCommand::run(Context& context, int argc, char* argv[]) {
     
     auto filename = context.readCurrentVepromFile();
     
-    VirtualEprom eprom{filename};
-    auto capacity = eprom.getCapacity();
+    EpromFile epromFile{filename};
+    VirtualEprom eprom{&epromFile};
+    auto capacity = epromFile.getCapacity();
     auto files = eprom.listFiles();
 
     // Print vEPROM capacity to stdout

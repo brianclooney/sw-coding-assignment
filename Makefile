@@ -18,6 +18,7 @@ SOURCES=$(SRC_DIR)/main.cpp \
 	$(SRC_DIR)/write_raw_command.cpp \
 	$(SRC_DIR)/read_file_command.cpp \
 	$(SRC_DIR)/write_file_command.cpp \
+	$(SRC_DIR)/eprom_file.cpp \
 	$(SRC_DIR)/virtual_eprom.cpp
 
 

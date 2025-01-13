@@ -3,6 +3,8 @@
 
 #include "read_raw_command.h"
 #include "virtual_eprom.h"
+#include "eprom_file.h"
+
 
 int ReadRawCommand::run(Context& context, int argc, char* argv[]) {
 
@@ -16,7 +18,8 @@ int ReadRawCommand::run(Context& context, int argc, char* argv[]) {
     ulong length = strtoul(argv[2], NULL, 0);
 
     try {
-        VirtualEprom eprom{filename};
+        EpromFile epromFile{filename};
+        VirtualEprom eprom{&epromFile};
         auto data = eprom.readRaw(address, length);
         std::cout << data << std::endl;
     } catch (const std::exception& e) {

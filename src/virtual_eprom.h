@@ -5,6 +5,7 @@
 
 #include "simple_file_system.h"
 #include "file_info.h"
+#include "eprom_interface.h"
 
 /**
  * @class VirtualEprom
@@ -17,7 +18,7 @@ public:
      * @brief Create instance of a vEPROM that is stored in the specified file
      *
      */    
-    VirtualEprom(std::string filename);
+    VirtualEprom(EpromInterface* interface);
 
     /**
      * @brief Creates a new vEPROM with a specified capacity.
@@ -71,10 +72,10 @@ public:
      * @brief Get capacity of the vEPROM.
      *
      */    
-    long getCapacity();
+    // long getCapacity();
 
 private:
-    std::string filename;
+    EpromInterface* epromInterface;
 
     /**
      * @brief Calculate checksum of data buffer.
@@ -84,22 +85,8 @@ private:
 
 
     /**
-     * @brief Save the file table to the vEPROM file.
+     * @brief Read input file into a string
      *
      */    
-    void writeFileTable(FileTable& fileTable);
-
-
-    /**
-     * @brief Read the file table from the vEPROM file.
-     *
-     */    
-    FileTable readFileTable();
-
-
-    /**
-     * @brief Read the file header at specified offset.
-     *
-     */    
-    void readFileHeader(long offset, FileHeader& fileHeader);
+    std::string readDataFile(std::string filename);
 };

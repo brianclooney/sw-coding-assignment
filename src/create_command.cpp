@@ -4,6 +4,7 @@
 
 #include "create_command.h"
 #include "virtual_eprom.h"
+#include "eprom_file.h"
 
 int CreateCommand::run(Context& context, int argc, char* argv[]) {
 
@@ -30,8 +31,10 @@ int CreateCommand::run(Context& context, int argc, char* argv[]) {
     }
     
     auto filename = context.getDataDirectory() + generateFilename(20);
-    
-    VirtualEprom eprom{filename};
+
+
+    EpromFile epromFile{filename};
+    VirtualEprom eprom{&epromFile};
     eprom.create(capacity);
     
     context.saveCurrentVepromFile(filename);
