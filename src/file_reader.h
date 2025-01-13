@@ -3,6 +3,11 @@
 #include <fstream>
 #include <string>
 
+/**
+ * @class FileReader
+ * @brief Class to read the contents of a file
+ *
+ */
 class FileReader
 {
 

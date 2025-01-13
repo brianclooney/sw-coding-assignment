@@ -9,7 +9,7 @@
 
 /**
  * @class VirtualEprom
- * @brief Class to emulate the vEPROM
+ * @brief Class to emulate the vEPROM with a file system
  *
  */
 class VirtualEprom {
