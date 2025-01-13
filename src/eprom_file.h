@@ -43,6 +43,10 @@ public:
 
 private:
 
+    /**
+     * @brief Filename of the file that backs the EPROM
+     *
+     */
     std::string filename;
 
 };
