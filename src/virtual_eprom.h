@@ -26,20 +26,17 @@ public:
      */    
     void create(int capacity);
 
-
     /**
      * @brief Writes a file to the vEPROM.
      *
      */    
     void writeFile(std::string filepath);
 
-
     /**
      * @brief Reads a file from the vEPROM.
      *
      */    
     std::string readFile(std::string filename);
-
 
     /**
      * @brief Writes a raw string of bytes to a specific address on the vEPROM.
@@ -54,13 +51,11 @@ public:
      */    
     std::string readRaw(long address, long length);
 
-
     /**
      * @brief Lists the file on the vEPROM to stdout.
      *
      */    
     std::vector<FileInfo> listFiles();
-
 
     /**
      * @brief Reset the EPROM back to its original state.
@@ -71,22 +66,13 @@ public:
     /**
      * @brief Get capacity of the vEPROM.
      *
-     */    
-    // long getCapacity();
+     */
 
 private:
+
+    /**
+     * @brief Interface for reading and writing to an EPROM
+     *
+     */    
     EpromInterface* epromInterface;
-
-    /**
-     * @brief Calculate checksum of data buffer.
-     *
-     */    
-    uint32_t calculateChecksum(char* data, long length);
-
-
-    /**
-     * @brief Read input file into a string
-     *
-     */    
-    std::string readDataFile(std::string filename);
 };

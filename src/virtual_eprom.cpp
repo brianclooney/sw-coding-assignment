@@ -9,6 +9,8 @@
 #include "virtual_eprom.h"
 #include "simple_file_system.h"
 #include "file_info.h"
+#include "checksum.h"
+#include "file_reader.h"
 
 
 VirtualEprom::VirtualEprom(EpromInterface* interface) {
@@ -22,7 +24,7 @@ void VirtualEprom::create(int capacity) {
     // Initialize file table
     std::unique_ptr<FileTable> fileTable(new FileTable());
     std::memset((void*)fileTable.get(), 0, sizeof(FileTable));
-    fileTable->checksum = calculateChecksum((char*)fileTable.get()+sizeof(uint32_t), sizeof(FileTable)-sizeof(uint32_t));
+    fileTable->checksum = Checksum::checksum((char*)fileTable.get()+sizeof(uint32_t), sizeof(FileTable)-sizeof(uint32_t));
     fileTable->freeOffset = sizeof(FileTable);
 
     epromInterface->write((char*)fileTable.get(), sizeof(FileTable), 0);
@@ -46,7 +48,7 @@ void VirtualEprom::writeFile(std::string filepath) {
         throw std::runtime_error("Max file limit has been reached.  Cannot add file.");
     }
 
-    auto buffer = readDataFile(filepath);
+    auto buffer = FileReader::readFile(filepath);
 
     // Check if the file will fit
     int capacity = epromInterface->getCapacity();
@@ -58,8 +60,8 @@ void VirtualEprom::writeFile(std::string filepath) {
     std::unique_ptr<FileHeader> fileHeader(new FileHeader());
     fileHeader->size = buffer.length();
     std::strncpy(fileHeader->filename, filepath.c_str(), MAX_FILENAME_LEN);
-    fileHeader->checksum = calculateChecksum((char*)buffer.data(), buffer.length());
-    fileHeader->checksum ^= calculateChecksum((char*)fileHeader.get()+sizeof(uint32_t), sizeof(FileHeader)-sizeof(uint32_t));
+    fileHeader->checksum = Checksum::checksum((char*)buffer.data(), buffer.length());
+    fileHeader->checksum ^= Checksum::checksum((char*)fileHeader.get()+sizeof(uint32_t), sizeof(FileHeader)-sizeof(uint32_t));
     epromInterface->write((char*)fileHeader.get(), sizeof(FileHeader), fileTable.freeOffset);
     
     // Write file contents
@@ -143,32 +145,4 @@ std::vector<FileInfo> VirtualEprom::listFiles() {
 
 void VirtualEprom::erase() {
     create(epromInterface->getCapacity());
-}
-
-uint32_t VirtualEprom::calculateChecksum(char* data, long length) {
-    uint32_t checksum = 0;
-    for (size_t i = 0; i < length; ++i) {
-        checksum ^= data[i];
-    }
-    return checksum;
-}
-
-std::string VirtualEprom::readDataFile(std::string filename) {
-    
-    // Open datafile
-    std::ifstream infile(filename, std::ios::binary);
-    
-    if (!infile) {
-        throw std::runtime_error("Failed to open input file");
-    }
-
-    // Read data file
-    infile.seekg(0, infile.end);
-    int len = infile.tellg();
-    std::string buffer(len+1, '\0');
-    infile.seekg(0, infile.beg);
-    infile.read(&buffer[0], len);
-    infile.close();
-
-    return buffer;
 }
