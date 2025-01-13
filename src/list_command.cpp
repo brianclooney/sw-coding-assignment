@@ -25,7 +25,11 @@ int ListCommand::run(Context& context, int argc, char* argv[]) {
 
     // Print file info to stdout
     for (const FileInfo& f : files) {
-        printf("%08X %11d  %s\n", f.offset, f.size, f.filename.c_str());
+        printf("%08X %11d  %s  %s\n", 
+            f.offset, 
+            f.size, 
+            f.filename.c_str(),
+            f.valid ? "" : "**CORRUPT**");
     }
 
     return 0;

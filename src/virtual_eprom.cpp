@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -51,17 +50,16 @@ void VirtualEprom::writeFile(std::string filepath) {
     auto buffer = FileReader::readFile(filepath);
 
     // Check if the file will fit
-    int capacity = epromInterface->getCapacity();
-    if (fileTable.freeOffset+sizeof(FileHeader)+buffer.length() > capacity) {
+    if (!willFit(fileTable.freeOffset, sizeof(FileHeader)+buffer.length())) {
         throw std::runtime_error("Data file will not fit on vEPROM");
     }
     
     // Write file header
     std::unique_ptr<FileHeader> fileHeader(new FileHeader());
+    std::memset((void*)fileHeader.get(), 0, sizeof(FileHeader));
     fileHeader->size = buffer.length();
     std::strncpy(fileHeader->filename, filepath.c_str(), MAX_FILENAME_LEN);
-    fileHeader->checksum = Checksum::checksum((char*)buffer.data(), buffer.length());
-    fileHeader->checksum ^= Checksum::checksum((char*)fileHeader.get()+sizeof(uint32_t), sizeof(FileHeader)-sizeof(uint32_t));
+    fileHeader->checksum = calculateFileChecksum(fileHeader.get(), buffer);
     epromInterface->write((char*)fileHeader.get(), sizeof(FileHeader), fileTable.freeOffset);
     
     // Write file contents
@@ -86,8 +84,12 @@ std::string VirtualEprom::readFile(std::string filename) {
         }
         epromInterface->read((char*)&fileHeader, sizeof(FileHeader), fileTable.fileOffsets[i]);
         if (strcmp(fileHeader.filename, filename.c_str()) == 0) {
-            // TODO: validate checksum
-            return readRaw(fileTable.fileOffsets[i]+sizeof(FileHeader), fileHeader.size);
+            auto data = readRaw(fileTable.fileOffsets[i]+sizeof(FileHeader), fileHeader.size);
+            if (!validateFileChecksum(&fileHeader, data)) {
+                throw std::runtime_error("Checksum failed for file");
+            }
+
+            return data;
         }
     }
 
@@ -97,8 +99,7 @@ std::string VirtualEprom::readFile(std::string filename) {
 void VirtualEprom::writeRaw(long address, std::string data) {
 
     // Check if the data will fit
-    int capacity = epromInterface->getCapacity();
-    if (address+data.size() > capacity) {
+    if (!willFit(address, data.size())) {
         throw std::runtime_error("Data will not fit on vEPROM");
     }
 
@@ -108,9 +109,8 @@ void VirtualEprom::writeRaw(long address, std::string data) {
 std::string VirtualEprom::readRaw(long address, long length) {
 
     // Check that we are not trying to read outside the vEPROM capacity
-    int capacity = epromInterface->getCapacity();
-    if (address+length > capacity) {
-        throw std::runtime_error("Failed to read outside the vEPROM capacity");
+    if (!willFit(address, length)) {
+        throw std::runtime_error("Read data is not within the vEPROM capacity");
     }
     
     auto buffer = std::make_unique<char[]>(length + 1);
@@ -136,7 +136,7 @@ std::vector<FileInfo> VirtualEprom::listFiles() {
         fileInfo.filename = fileHeader.filename;
         fileInfo.offset = fileTable.fileOffsets[i];
         fileInfo.size = fileHeader.size + sizeof(FileHeader);
-        fileInfo.valid = true;  // TODO: validate checksum
+        fileInfo.valid = validateFileChecksum(&fileHeader, readRaw(fileTable.fileOffsets[i] + sizeof(FileHeader), fileHeader.size));
         files.push_back(fileInfo);
     }
 
@@ -145,4 +145,23 @@ std::vector<FileInfo> VirtualEprom::listFiles() {
 
 void VirtualEprom::erase() {
     create(epromInterface->getCapacity());
+}
+
+// Private methods
+
+uint32_t VirtualEprom::calculateFileChecksum(FileHeader* fileHeader, std::string data) {
+    uint32_t checksum = Checksum::checksum((char*)data.c_str(), data.size());
+    checksum += Checksum::checksum((char*)fileHeader+sizeof(uint32_t), sizeof(FileHeader)-sizeof(uint32_t));
+    return checksum;
+}
+
+bool VirtualEprom::validateFileChecksum(FileHeader* fileHeader, std::string data) {
+    bool result = calculateFileChecksum(fileHeader, data) == fileHeader->checksum;
+    return result;
+}
+
+// Check if data will fit on vEPROM
+bool VirtualEprom::willFit(int address, int length) {
+    int capacity = epromInterface->getCapacity();
+    return address + length < capacity && address > 0;
 }

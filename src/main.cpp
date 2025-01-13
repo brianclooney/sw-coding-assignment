@@ -66,15 +66,20 @@ int main(int argc, char* argv[]) {
     }
 
     // Handle commands
-    if (argc-optind >= 1 && std::strcmp(argv[optind], "help") != 0) {
+    try {
+        if (argc-optind >= 1 && std::strcmp(argv[optind], "help") != 0) {
 
-        auto cmd = registry.getCommand(argv[optind]);
-        if (cmd != nullptr) {
-            return cmd->run(context, argc-optind, &argv[optind]);
-        } else {
-            std::cout << "veprom: '" <<  argv[optind] << "' command is not supported.";
-            std::cout << std::endl << std::endl;
+            auto cmd = registry.getCommand(argv[optind]);
+            if (cmd != nullptr) {
+                return cmd->run(context, argc-optind, &argv[optind]);
+            } else {
+                std::cout << "veprom: '" <<  argv[optind] << "' command is not supported.";
+                std::cout << std::endl << std::endl;
+            }
         }
+    } catch (const std::exception& e) {
+        std::cout << "ERROR: " << e.what() << std::endl;
+        return -1;
     }
 
     displayHelp(registry);

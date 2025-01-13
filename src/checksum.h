@@ -20,7 +20,7 @@ public:
     static uint32_t checksum(char* data, long length) {
         uint32_t checksum = 0;
         for (size_t i = 0; i < length; ++i) {
-            checksum ^= data[i];
+            checksum += data[i];
         }
         return checksum;
     }

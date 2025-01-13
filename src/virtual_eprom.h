@@ -75,4 +75,22 @@ private:
      *
      */    
     EpromInterface* epromInterface;
+
+    /**
+     * @brief Calculate the checksum of a file.
+     *
+     */
+    uint32_t calculateFileChecksum(FileHeader* fileHeader, std::string data);
+
+    /**
+     * @brief Validate the checksum of a file.
+     *
+     */
+    bool validateFileChecksum(FileHeader* fileHeader, std::string data);
+
+    /**
+     * @brief Check if data will fit on vEPROM.
+     *
+     */
+    bool willFit(int address, int length);
 };

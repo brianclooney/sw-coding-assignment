@@ -1,32 +1,10 @@
-# Prerequisites
-*.d
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+/build
+/.vscode
 
-# Precompiled Headers
-*.gch
-*.pch
+# Ignore all vEPROM files
+/.veprom
+/veprom-files
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+# Ingnore all test files
+/*.txt
